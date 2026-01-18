@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { Worker, Queue, QueueScheduler } from "bullmq";
+import { Worker, Queue } from "bullmq";
 import { config, logger } from "@resell-lausanne/shared";
 import { syncShopifyVariants } from "./services/shopify-importer";
 import { syncSupplierOffers } from "./services/supplier";
@@ -32,17 +32,6 @@ const galaxusExportQueue = new Queue(galaxusExportQueueName, {
   connection: redisConnection
 });
 
-const schedulerNames = [
-  shopifyQueueName,
-  suppliersQueueName,
-  supplier1QueueName,
-  galaxusComputeQueueName,
-  galaxusExportQueueName
-];
-
-schedulerNames.forEach((name) => {
-  new QueueScheduler(name, { connection: redisConnection });
-});
 
 new Worker(
   shopifyQueueName,

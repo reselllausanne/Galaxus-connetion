@@ -1,8 +1,13 @@
 {
   "compilerOptions": {
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@resell-lausanne/shared": ["packages/shared/src"],
+      "@resell-lausanne/db": ["packages/db/src"]
+    },
     "target": "ES2021",
     "module": "ESNext",
-    "moduleResolution": "Node",
     "lib": ["DOM", "ES2021"],
     "declaration": true,
     "emitDecoratorMetadata": true,
