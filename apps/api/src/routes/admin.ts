@@ -3,6 +3,7 @@ import { Queue } from "bullmq";
 import { config } from "@resell-lausanne/shared";
 import { promises as fs } from "fs";
 import path from "path";
+import { prisma } from "@resell-lausanne/db";
 
 const queueNames = {
   shopify: "shopify:snapshot",
@@ -130,6 +131,64 @@ export function adminRoutes(app: FastifyInstance) {
   app.post("/admin/run/galaxus", async () => {
     await enqueueJob(queueNames.galaxus);
     return { queued: queueNames.galaxus };
+  });
+
+  app.get("/admin/offers", async (request) => {
+    const query = request.query as {
+      source?: string;
+      providerKey?: string;
+      limit?: string;
+      offset?: string;
+    };
+    const limit = Math.min(Number(query.limit ?? 50), 500);
+    const offset = Number(query.offset ?? 0);
+
+    const offers = await prisma.offer.findMany({
+      where: {
+        ...(query.providerKey ? { providerKey: query.providerKey } : {}),
+        ...(query.source ? { source: { name: query.source } } : {})
+      },
+      include: { source: true },
+      take: limit,
+      skip: offset,
+      orderBy: { lastSeenAt: "desc" }
+    });
+
+    return offers;
+  });
+
+  app.get("/admin/variants", async (request) => {
+    const query = request.query as { providerKey?: string; limit?: string; offset?: string };
+    const limit = Math.min(Number(query.limit ?? 50), 500);
+    const offset = Number(query.offset ?? 0);
+    const variants = await prisma.productVariant.findMany({
+      where: query.providerKey ? { providerKey: query.providerKey } : undefined,
+      take: limit,
+      skip: offset,
+      orderBy: { updatedAt: "desc" }
+    });
+    return variants;
+  });
+
+  app.get("/admin/channel-offers", async (request) => {
+    const query = request.query as {
+      channel?: string;
+      providerKey?: string;
+      limit?: string;
+      offset?: string;
+    };
+    const limit = Math.min(Number(query.limit ?? 50), 500);
+    const offset = Number(query.offset ?? 0);
+    const channelOffers = await prisma.channelOffer.findMany({
+      where: {
+        ...(query.providerKey ? { providerKey: query.providerKey } : {}),
+        ...(query.channel ? { channel: query.channel as any } : {})
+      },
+      take: limit,
+      skip: offset,
+      orderBy: { updatedAt: "desc" }
+    });
+    return channelOffers;
   });
 
   app.get("/admin/exports", async () => {
