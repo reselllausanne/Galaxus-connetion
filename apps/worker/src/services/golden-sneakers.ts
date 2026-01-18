@@ -48,7 +48,8 @@ const pickCurrency = (raw: Record<string, unknown>) => {
 };
 
 export async function fetchGoldenSneakersOffers(): Promise<GoldenSneakersOffer[]> {
-  if (!config.GOLDENSNEAKERS_TOKEN) {
+  const token = config.GOLDENSNEAKERS_TOKEN?.trim();
+  if (!token) {
     logger.warn("GoldenSneakers token missing; skipping fetch");
     return [];
   }
@@ -56,7 +57,7 @@ export async function fetchGoldenSneakersOffers(): Promise<GoldenSneakersOffer[]
   const response = await fetch(buildUrl(), {
     headers: {
       accept: "application/json",
-      Authorization: `Bearer ${config.GOLDENSNEAKERS_TOKEN}`
+      Authorization: `Bearer ${token}`
     }
   });
 
