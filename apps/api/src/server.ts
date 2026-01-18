@@ -1,6 +1,5 @@
 import "dotenv/config";
 import Fastify from "fastify";
-import cors from "@fastify/cors";
 import { adminRoutes } from "./routes/admin";
 import { config, logger } from "@resell-lausanne/shared";
 
@@ -9,10 +8,6 @@ const PORT = Number(process.env.PORT || 4000);
 export function buildServer() {
   const app = Fastify({
     logger: true
-  });
-
-  app.register(cors, {
-    origin: false
   });
 
   adminRoutes(app);
