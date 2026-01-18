@@ -58,10 +58,13 @@ export async function generateGalaxusExports() {
     }
   });
 
-  const variantMap = variants.reduce((acc, variant) => {
-    acc[variant.providerKey] = variant;
-    return acc;
-  }, {} as Record<string, (typeof variants)[number]>);
+  const variantMap = variants.reduce(
+    (acc: Record<string, any>, variant: any) => {
+      acc[variant.providerKey] = variant;
+      return acc;
+    },
+    {} as Record<string, any>
+  );
 
   const validationRows: ValidationEntry[] = [];
   const priceRows: CSVRow[] = [];
@@ -106,7 +109,7 @@ export async function generateGalaxusExports() {
 
     const priceRow: CSVRow = {
       providerKey: variant.providerKey,
-      price: offer.sellPrice ?? offer.computedCost ?? "",
+      price: offer.sellPrice?.toString() ?? offer.computedCost?.toString() ?? "",
       currency: offer.sellCurrency ?? "",
       stockQty: offer.computedStockQty ?? "",
       leadTimeDays: offer.computedLeadTimeDays ?? ""

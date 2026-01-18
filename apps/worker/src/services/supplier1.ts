@@ -99,7 +99,7 @@ const writeUnmappedRows = async (rows: Array<Supplier1Row & { reason: string }>)
   );
 };
 
-const resolveProviderKey = async (sourceId: string, supplierSku: string) => {
+const resolveProviderKey = async (sourceId: string, supplierSku: string): Promise<string | undefined> => {
   const mapping = await prisma.supplierSkuMap.findUnique({
     where: {
       sourceId_supplierSku: {
@@ -108,7 +108,7 @@ const resolveProviderKey = async (sourceId: string, supplierSku: string) => {
       }
     }
   });
-  return mapping?.providerKey ?? null;
+  return mapping?.providerKey ?? undefined;
 };
 
 export async function syncSupplier1Offers() {

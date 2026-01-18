@@ -81,7 +81,7 @@ export async function syncSupplierOffers() {
         ? Number(raw.leadTimeDays)
         : undefined,
       lastSeenAt: new Date(),
-      rawJson: raw
+      rawJson: raw as any
     };
 
     tasks.push(
@@ -129,7 +129,7 @@ export async function syncSupplierOffers() {
             currency: offer.currency,
             leadTimeDays: offer.leadTimeDays,
             lastSeenAt: new Date(),
-            rawJson: offer.raw
+            rawJson: offer.raw as any
           },
           update: {
             stockQty: offer.stockQty,
@@ -137,7 +137,7 @@ export async function syncSupplierOffers() {
             currency: offer.currency,
             leadTimeDays: offer.leadTimeDays,
             lastSeenAt: new Date(),
-            rawJson: offer.raw
+            rawJson: offer.raw as any
           }
         })
       )

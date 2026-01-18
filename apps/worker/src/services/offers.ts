@@ -5,7 +5,7 @@ export type OfferWithSource = {
   providerKey: string;
   sourceId: string;
   stockQty: number;
-  cost: string;
+  cost: string | Decimal;
   currency: string;
   leadTimeDays?: number | null;
   lastSeenAt: Date;
