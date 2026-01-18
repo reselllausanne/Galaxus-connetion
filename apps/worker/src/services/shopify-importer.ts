@@ -94,7 +94,7 @@ export async function syncShopifyVariants() {
   let count = 0;
 
   do {
-    const response = await fetch(endpoint, {
+    const response: Response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -103,13 +103,13 @@ export async function syncShopifyVariants() {
       body: JSON.stringify({ query: GRAPHQL_QUERY, variables: { cursor } })
     });
 
-    const payload = await response.json();
+    const payload: any = await response.json();
     if (payload.errors) {
       logger.error({ errors: payload.errors }, "Shopify GraphQL error");
       throw new Error("Shopify GraphQL failed");
     }
 
-    const connection = payload.data.productVariants;
+    const connection: any = payload.data.productVariants;
 
     for (const edge of connection.edges) {
       const variant = edge.node;

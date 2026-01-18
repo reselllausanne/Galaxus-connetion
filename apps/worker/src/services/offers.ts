@@ -1,8 +1,19 @@
-import { Offer, Source } from "@prisma/client";
 import Decimal from "decimal.js";
 
-export type OfferWithSource = Offer & {
-  source: Source;
+export type OfferWithSource = {
+  id: string;
+  providerKey: string;
+  sourceId: string;
+  stockQty: number;
+  cost: string;
+  currency: string;
+  leadTimeDays?: number | null;
+  lastSeenAt: Date;
+  rawJson?: unknown;
+  source: {
+    id: string;
+    name: string;
+  };
 };
 
 const SOURCE_PRIORITY: Record<string, number> = {

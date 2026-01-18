@@ -53,13 +53,13 @@ export async function generateGalaxusExports() {
   const variants = await prisma.productVariant.findMany({
     where: {
       providerKey: {
-        in: channelOffers.map((offer) => offer.providerKey)
+        in: channelOffers.map((offer: { providerKey: string }) => offer.providerKey)
       }
     }
   });
 
-  const variantMap = variants.reduce<Record<string, typeof variants[number]>>(
-    (acc, variant) => {
+  const variantMap = variants.reduce<Record<string, (typeof variants)[number]>>(
+    (acc: Record<string, (typeof variants)[number]>, variant) => {
       acc[variant.providerKey] = variant;
       return acc;
     },
@@ -70,7 +70,7 @@ export async function generateGalaxusExports() {
   const priceRows: CSVRow[] = [];
   const masterRows: CSVRow[] = [];
 
-  const requiredFields: Array<keyof typeof variants[number]> = [
+  const requiredFields: Array<keyof (typeof variants)[number]> = [
     "gtin",
     "weightGrams",
     "originCountry",
