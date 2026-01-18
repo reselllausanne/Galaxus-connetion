@@ -16,9 +16,7 @@ const makeOffer = (
   rawJson: {},
   source: {
     id: "source-1",
-    name: sourceName,
-    type: "CSV",
-    configJson: null
+    name: sourceName
   },
   ...overrides
 });

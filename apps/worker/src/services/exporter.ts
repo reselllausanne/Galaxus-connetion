@@ -58,13 +58,10 @@ export async function generateGalaxusExports() {
     }
   });
 
-  const variantMap = variants.reduce<Record<string, (typeof variants)[number]>>(
-    (acc: Record<string, (typeof variants)[number]>, variant) => {
-      acc[variant.providerKey] = variant;
-      return acc;
-    },
-    {}
-  );
+  const variantMap = variants.reduce((acc, variant) => {
+    acc[variant.providerKey] = variant;
+    return acc;
+  }, {} as Record<string, (typeof variants)[number]>);
 
   const validationRows: ValidationEntry[] = [];
   const priceRows: CSVRow[] = [];
@@ -81,7 +78,7 @@ export async function generateGalaxusExports() {
     if (!offer.publish) {
       const missingFields = requiredFields.filter(
         (field) => !variantMap[offer.providerKey]?.[field]
-      );
+      ) as string[];
       validationRows.push({
         providerKey: offer.providerKey,
         missingFields,
@@ -117,7 +114,7 @@ export async function generateGalaxusExports() {
 
     priceRows.push(priceRow);
 
-    const missingFields = requiredFields.filter((field) => !variant[field]);
+    const missingFields = requiredFields.filter((field) => !variant[field]) as string[];
     if (missingFields.length) {
       validationRows.push({
         providerKey: variant.providerKey,
