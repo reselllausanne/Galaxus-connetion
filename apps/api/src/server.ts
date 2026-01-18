@@ -8,7 +8,7 @@ const PORT = Number(process.env.PORT || 4000);
 
 export function buildServer() {
   const app = Fastify({
-    logger
+    logger: true
   });
 
   app.register(cors, {
