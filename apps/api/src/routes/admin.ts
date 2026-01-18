@@ -48,11 +48,16 @@ export function adminRoutes(app: FastifyInstance) {
       button:hover { background: #eee; }
       pre { background: #111; color: #0f0; padding: 12px; border-radius: 6px; overflow-x: auto; }
       .row { margin: 8px 0; }
+      .help { color: #666; font-size: 13px; }
+      table { border-collapse: collapse; width: 100%; margin: 8px 0 20px; }
+      th, td { border: 1px solid #ddd; padding: 6px 8px; font-size: 12px; }
+      th { background: #f3f3f3; text-align: left; }
+      input, select { padding: 6px; margin-right: 8px; }
       a { color: #2b6cb0; }
     </style>
   </head>
   <body>
-    <h1>Integration Hub</h1>
+    <h1>Integration Hub Dashboard</h1>
     <div class="row">Status: <span id="health">loading...</span></div>
     <div class="grid">
       <button onclick="runJob('shopify')">Run Shopify Snapshot</button>
@@ -61,9 +66,61 @@ export function adminRoutes(app: FastifyInstance) {
       <button onclick="runJob('galaxus')">Run Galaxus Export</button>
       <button onclick="loadExports()">List Exports</button>
     </div>
+
     <div class="row"><strong>Exports:</strong> <span id="exports"></span></div>
+
+    <h2>Supplier Offers (GoldenSneakers / Supplier1)</h2>
+    <div class="row">
+      <label>Source:
+        <select id="offersSource">
+          <option value="">All</option>
+          <option value="goldensneakers">goldensneakers</option>
+          <option value="supplier1">supplier1</option>
+        </select>
+      </label>
+      <label>Provider Key:
+        <input id="offersProviderKey" placeholder="EAN / GTIN / providerKey" />
+      </label>
+      <label>Limit:
+        <input id="offersLimit" value="50" />
+      </label>
+      <button onclick="loadOffers()">Load Offers</button>
+    </div>
+    <div class="row help">Each offer has providerKey (EAN/GTIN), supplierSku (optional), stock, cost, lead time, and source.</div>
+    <div id="offersTable"></div>
+
+    <h2>Shopify Variants (Master Data)</h2>
+    <div class="row">
+      <label>Provider Key:
+        <input id="variantsProviderKey" placeholder="EAN / GTIN / providerKey" />
+      </label>
+      <label>Limit:
+        <input id="variantsLimit" value="50" />
+      </label>
+      <button onclick="loadVariants()">Load Variants</button>
+    </div>
+    <div class="row help">Variants hold title, GTIN, weight, originCountry, etc. Offers link by providerKey.</div>
+    <div id="variantsTable"></div>
+
+    <h2>Channel Offers (Galaxus)</h2>
+    <div class="row">
+      <label>Channel:
+        <input id="channelName" value="GALAXUS" />
+      </label>
+      <label>Provider Key:
+        <input id="channelProviderKey" placeholder="EAN / GTIN / providerKey" />
+      </label>
+      <label>Limit:
+        <input id="channelLimit" value="50" />
+      </label>
+      <button onclick="loadChannelOffers()">Load Channel Offers</button>
+    </div>
+    <div class="row help">Computed offers used for export. publish=false means missing master data or no offers.</div>
+    <div id="channelTable"></div>
+
     <div class="row"><strong>Output:</strong></div>
     <pre id="output"></pre>
+
     <script>
       const output = document.getElementById("output");
       const healthEl = document.getElementById("health");
@@ -99,6 +156,92 @@ export function adminRoutes(app: FastifyInstance) {
         exportsEl.innerHTML = res.data
           .map((f) => '<a href="/admin/exports/' + encodeURIComponent(f.name) + '" target="_blank">' + f.name + '</a> (' + f.size + ' bytes)')
           .join(" | ");
+      };
+
+      const renderTable = (containerId, columns, rows) => {
+        const container = document.getElementById(containerId);
+        if (!rows || !rows.length) {
+          container.innerHTML = "<div class='row'>No data</div>";
+          return;
+        }
+        const header = columns.map((c) => "<th>" + c + "</th>").join("");
+        const body = rows.map((row) => {
+          const cells = columns.map((c) => "<td>" + (row[c] ?? "") + "</td>").join("");
+          return "<tr>" + cells + "</tr>";
+        }).join("");
+        container.innerHTML = "<table><thead><tr>" + header + "</tr></thead><tbody>" + body + "</tbody></table>";
+      };
+
+      const loadOffers = async () => {
+        const source = document.getElementById("offersSource").value.trim();
+        const providerKey = document.getElementById("offersProviderKey").value.trim();
+        const limit = document.getElementById("offersLimit").value.trim();
+        const params = new URLSearchParams();
+        if (source) params.set("source", source);
+        if (providerKey) params.set("providerKey", providerKey);
+        if (limit) params.set("limit", limit);
+        const res = await fetchJson("/admin/offers?" + params.toString());
+        if (!res.ok) {
+          log("Failed to load offers");
+          return;
+        }
+        const rows = res.data.map((offer) => ({
+          providerKey: offer.providerKey,
+          supplierSku: offer.supplierSku || "",
+          source: offer.source?.name || "",
+          stockQty: offer.stockQty,
+          cost: offer.cost,
+          currency: offer.currency,
+          leadTimeDays: offer.leadTimeDays ?? "",
+          lastSeenAt: offer.lastSeenAt
+        }));
+        renderTable("offersTable", ["providerKey","supplierSku","source","stockQty","cost","currency","leadTimeDays","lastSeenAt"], rows);
+      };
+
+      const loadVariants = async () => {
+        const providerKey = document.getElementById("variantsProviderKey").value.trim();
+        const limit = document.getElementById("variantsLimit").value.trim();
+        const params = new URLSearchParams();
+        if (providerKey) params.set("providerKey", providerKey);
+        if (limit) params.set("limit", limit);
+        const res = await fetchJson("/admin/variants?" + params.toString());
+        if (!res.ok) {
+          log("Failed to load variants");
+          return;
+        }
+        const rows = res.data.map((v) => ({
+          providerKey: v.providerKey,
+          title: v.title,
+          gtin: v.gtin,
+          weightGrams: v.weightGrams,
+          originCountry: v.originCountry,
+          vendor: v.vendor || ""
+        }));
+        renderTable("variantsTable", ["providerKey","title","gtin","weightGrams","originCountry","vendor"], rows);
+      };
+
+      const loadChannelOffers = async () => {
+        const channel = document.getElementById("channelName").value.trim();
+        const providerKey = document.getElementById("channelProviderKey").value.trim();
+        const limit = document.getElementById("channelLimit").value.trim();
+        const params = new URLSearchParams();
+        if (channel) params.set("channel", channel);
+        if (providerKey) params.set("providerKey", providerKey);
+        if (limit) params.set("limit", limit);
+        const res = await fetchJson("/admin/channel-offers?" + params.toString());
+        if (!res.ok) {
+          log("Failed to load channel offers");
+          return;
+        }
+        const rows = res.data.map((c) => ({
+          providerKey: c.providerKey,
+          publish: c.publish,
+          sellPrice: c.sellPrice ?? "",
+          sellCurrency: c.sellCurrency ?? "",
+          computedStockQty: c.computedStockQty ?? "",
+          computedLeadTimeDays: c.computedLeadTimeDays ?? ""
+        }));
+        renderTable("channelTable", ["providerKey","publish","sellPrice","sellCurrency","computedStockQty","computedLeadTimeDays"], rows);
       };
 
       loadHealth();
