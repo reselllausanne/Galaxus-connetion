@@ -40,6 +40,7 @@ const ensureExportsDir = async () => {
 export interface ValidationEntry {
   providerKey: string;
   missingFields: string[];
+  notes: string;
 }
 
 export async function generateGalaxusExports() {
@@ -72,7 +73,8 @@ export async function generateGalaxusExports() {
   const requiredFields: Array<keyof typeof variants[number]> = [
     "gtin",
     "weightGrams",
-    "originCountry"
+    "originCountry",
+    "title"
   ];
 
   for (const offer of channelOffers) {
@@ -82,7 +84,8 @@ export async function generateGalaxusExports() {
       );
       validationRows.push({
         providerKey: offer.providerKey,
-        missingFields
+        missingFields,
+        notes: "publish=false"
       });
       continue;
     }
@@ -118,7 +121,8 @@ export async function generateGalaxusExports() {
     if (missingFields.length) {
       validationRows.push({
         providerKey: variant.providerKey,
-        missingFields
+        missingFields,
+        notes: "missing_master_fields"
       });
     }
   }
@@ -134,7 +138,13 @@ export async function generateGalaxusExports() {
     ),
     fs.writeFile(
       path.join(config.EXPORTS_PATH, "galaxus_validation_report.csv"),
-      ["providerKey,missingFields", ...validationRows.map((entry) => `${entry.providerKey},"${entry.missingFields.join(";")}"`)].join("\n")
+      [
+        "providerKey,missingFields,notes",
+        ...validationRows.map(
+          (entry) =>
+            `${entry.providerKey},"${entry.missingFields.join(";")}",${entry.notes}`
+        )
+      ].join("\n")
     )
   ]);
 

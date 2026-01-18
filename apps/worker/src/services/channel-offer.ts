@@ -17,7 +17,10 @@ export async function computeGalaxusOffers() {
 
     const best = selectBestOffer(offers as OfferWithSource[]);
     const isDataComplete =
-      !!variant.gtin && !!variant.weightGrams && !!variant.originCountry;
+      !!variant.gtin &&
+      !!variant.weightGrams &&
+      !!variant.originCountry &&
+      !!variant.title;
 
     const publish = Boolean(best && isDataComplete);
 
@@ -26,6 +29,7 @@ export async function computeGalaxusOffers() {
       if (!variant.gtin) missingFields.push("gtin");
       if (!variant.weightGrams) missingFields.push("weightGrams");
       if (!variant.originCountry) missingFields.push("originCountry");
+      if (!variant.title) missingFields.push("title");
       validations.push({ providerKey: variant.providerKey, missingFields });
     }
 

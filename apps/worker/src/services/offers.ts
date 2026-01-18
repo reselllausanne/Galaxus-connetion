@@ -6,11 +6,13 @@ export type OfferWithSource = Offer & {
 };
 
 const SOURCE_PRIORITY: Record<string, number> = {
-  own: 1,
-  friend: 2,
-  supplierA: 3,
-  supplierB: 4,
-  stockx: 5
+  own_stock: 1,
+  supplier1: 2,
+  own: 3,
+  friend: 4,
+  suppliera: 5,
+  supplierb: 6,
+  stockx: 7
 };
 
 const getSourceRank = (name?: string) =>

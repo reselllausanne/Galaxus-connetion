@@ -24,13 +24,13 @@ const makeOffer = (
 });
 
 describe("selectBestOffer", () => {
-  it("prefers own source regardless of stock", () => {
+  it("prefers own_stock source regardless of stock", () => {
     const winner = selectBestOffer([
       makeOffer("supplierA", { stockQty: 20, cost: "50" }),
-      makeOffer("own", { stockQty: 1, cost: "60" })
+      makeOffer("own_stock", { stockQty: 1, cost: "60" })
     ]);
 
-    expect(winner?.source.name).toBe("own");
+    expect(winner?.source.name).toBe("own_stock");
   });
 
   it("uses stock as tiebreaker for equal priority", () => {

@@ -5,6 +5,7 @@ import { config } from "@resell-lausanne/shared";
 const queueNames = {
   shopify: "shopify:snapshot",
   suppliers: "suppliers:sync",
+  supplier1: "supplier1:sync",
   galaxus: "galaxus:export_upload"
 };
 
@@ -41,6 +42,11 @@ export function adminRoutes(app: FastifyInstance) {
   app.post("/admin/run/suppliers", async () => {
     await enqueueJob(queueNames.suppliers);
     return { queued: queueNames.suppliers };
+  });
+
+  app.post("/admin/run/supplier1", async () => {
+    await enqueueJob(queueNames.supplier1);
+    return { queued: queueNames.supplier1 };
   });
 
   app.post("/admin/run/galaxus", async () => {

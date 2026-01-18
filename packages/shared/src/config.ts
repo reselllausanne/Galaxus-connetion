@@ -27,6 +27,7 @@ const envSchema = z.object({
   SHOPIFY_SNAPSHOT_CRON: z.string().default("0 2 * * *"),
   SUPPLIERS_SYNC_CRON: z.string().default("0 */2 * * *"),
   GALAXUS_EXPORT_CRON: z.string().default("0 */2 * * *"),
+  SUPPLIER1_SYNC_CRON: z.string().default("0 */2 * * *"),
 
   EXPORTS_PATH: z.string().default("/exports"),
   SUPPLIER_CSV_PATH: z.string().default("./data/supplier_offers.csv"),
@@ -40,7 +41,12 @@ const envSchema = z.object({
   GOLDENSNEAKERS_MARKUP: z.coerce.number().default(10),
   GOLDENSNEAKERS_VAT: z.coerce.number().default(8.1),
   GOLDENSNEAKERS_ROUNDING: z.string().default("whole"),
-  GOLDENSNEAKERS_ONLY_EAN: z.coerce.boolean().default(true)
+  GOLDENSNEAKERS_ONLY_EAN: z.coerce.boolean().default(true),
+
+  SUPPLIER1_MODE: z.enum(["csv", "api"]).default("csv"),
+  SUPPLIER1_CSV_PATH: z.string().default("./data/supplier1_offers.csv"),
+  SUPPLIER1_API_URL: z.string().default(""),
+  SUPPLIER1_API_TOKEN: z.string().optional()
 });
 
 export const config = envSchema.parse(process.env);

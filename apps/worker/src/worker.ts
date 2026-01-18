@@ -3,6 +3,7 @@ import { Worker, Queue, QueueScheduler } from "bullmq";
 import { config, logger } from "@resell-lausanne/shared";
 import { syncShopifyVariants } from "./services/shopify-importer";
 import { syncSupplierOffers } from "./services/supplier";
+import { syncSupplier1Offers } from "./services/supplier1";
 import { computeGalaxusOffers } from "./services/channel-offer";
 import { generateGalaxusExports } from "./services/exporter";
 import { uploadGalaxusFiles } from "./services/uploader";
@@ -15,11 +16,15 @@ const redisConnection = {
 
 const shopifyQueueName = "shopify:snapshot";
 const suppliersQueueName = "suppliers:sync";
+const supplier1QueueName = "supplier1:sync";
 const galaxusComputeQueueName = "galaxus:compute";
 const galaxusExportQueueName = "galaxus:export_upload";
 
 const shopifyQueue = new Queue(shopifyQueueName, { connection: redisConnection });
 const suppliersQueue = new Queue(suppliersQueueName, { connection: redisConnection });
+const supplier1Queue = new Queue(supplier1QueueName, {
+  connection: redisConnection
+});
 const galaxusComputeQueue = new Queue(galaxusComputeQueueName, {
   connection: redisConnection
 });
@@ -30,6 +35,7 @@ const galaxusExportQueue = new Queue(galaxusExportQueueName, {
 const schedulerNames = [
   shopifyQueueName,
   suppliersQueueName,
+  supplier1QueueName,
   galaxusComputeQueueName,
   galaxusExportQueueName
 ];
@@ -52,6 +58,16 @@ new Worker(
   async () => {
     logger.info("Syncing supplier offers");
     await syncSupplierOffers();
+  },
+  { connection: redisConnection }
+);
+
+new Worker(
+  supplier1QueueName,
+  async () => {
+    logger.info("Syncing supplier1 offers");
+    await syncSupplier1Offers();
+    await galaxusComputeQueue.add("trigger", {}, { removeOnComplete: true });
   },
   { connection: redisConnection }
 );
@@ -94,6 +110,16 @@ async function scheduleRepeatables() {
     {
       jobId: "suppliers:sync:repeat",
       repeat: { cron: config.SUPPLIERS_SYNC_CRON },
+      removeOnComplete: true
+    }
+  );
+
+  await supplier1Queue.add(
+    "repeatable",
+    {},
+    {
+      jobId: "supplier1:sync:repeat",
+      repeat: { cron: config.SUPPLIER1_SYNC_CRON },
       removeOnComplete: true
     }
   );

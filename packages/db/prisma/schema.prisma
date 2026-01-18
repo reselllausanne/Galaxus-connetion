@@ -42,6 +42,7 @@ model Source {
   type       SourceType
   configJson Json?
   offers     Offer[]
+  skuMaps    SupplierSkuMap[]
 }
 
 model Offer {
@@ -49,6 +50,7 @@ model Offer {
   providerKey    String
   source         Source   @relation(fields: [sourceId], references: [id])
   sourceId       String
+  supplierSku    String?
   stockQty       Int
   cost           Decimal
   currency       String
@@ -58,6 +60,16 @@ model Offer {
 
   @@unique([providerKey, sourceId])
   @@index([providerKey])
+}
+
+model SupplierSkuMap {
+  id          String @id @default(uuid())
+  source      Source @relation(fields: [sourceId], references: [id])
+  sourceId    String
+  supplierSku String
+  providerKey String
+
+  @@unique([sourceId, supplierSku])
 }
 
 model ChannelOffer {
