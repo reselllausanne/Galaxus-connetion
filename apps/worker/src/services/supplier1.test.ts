@@ -32,8 +32,25 @@ const buildCsv = async (dir: string) => {
   return filePath;
 };
 
+const mockSharedConfig = (overrides: Record<string, unknown>) => {
+  vi.doMock("@resell-lausanne/shared", () => ({
+    config: {
+      SUPPLIER1_MODE: "csv",
+      SUPPLIER1_CSV_PATH: "",
+      SUPPLIER1_API_URL: "",
+      SUPPLIER1_API_TOKEN: "",
+      EXPORTS_PATH: "",
+      ...overrides
+    },
+    logger: {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn()
+    }
+  }));
+};
+
 describe("supplier1 ingestion", () => {
-  const originalEnv = { ...process.env };
   let tempDir: string;
 
   beforeEach(async () => {
@@ -44,16 +61,17 @@ describe("supplier1 ingestion", () => {
   });
 
   afterEach(async () => {
-    process.env = { ...originalEnv };
     await fs.rm(tempDir, { recursive: true, force: true });
     vi.resetModules();
   });
 
   it("writes unmapped supplierSku rows to export file", async () => {
     const csvPath = await buildCsv(tempDir);
-    process.env.SUPPLIER1_MODE = "csv";
-    process.env.SUPPLIER1_CSV_PATH = csvPath;
-    process.env.EXPORTS_PATH = tempDir;
+    mockSharedConfig({
+      SUPPLIER1_MODE: "csv",
+      SUPPLIER1_CSV_PATH: csvPath,
+      EXPORTS_PATH: tempDir
+    });
 
     mockFindUnique.mockResolvedValueOnce(null);
 
@@ -70,12 +88,21 @@ describe("supplier1 ingestion", () => {
   });
 
   it("uses upsert for repeated runs (idempotent)", async () => {
-    const csvPath = await buildCsv(tempDir);
-    process.env.SUPPLIER1_MODE = "csv";
-    process.env.SUPPLIER1_CSV_PATH = csvPath;
-    process.env.EXPORTS_PATH = tempDir;
+    mockSharedConfig({
+      SUPPLIER1_MODE: "api",
+      SUPPLIER1_API_URL: "https://supplier1.example.test/offers",
+      SUPPLIER1_API_TOKEN: "token",
+      EXPORTS_PATH: tempDir
+    });
 
     mockFindUnique.mockResolvedValueOnce({ providerKey: "SKU-2" });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => [
+        { providerKey: "SKU-1", stockQty: 5, cost: 100, currency: "CHF" },
+        { supplierSku: "SUP-1", stockQty: 2, cost: 80, currency: "CHF" }
+      ]
+    }));
 
     const { syncSupplier1Offers } = await import("./supplier1");
     await syncSupplier1Offers();
