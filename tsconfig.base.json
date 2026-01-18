@@ -3,8 +3,8 @@
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
-      "@resell-lausanne/shared": ["packages/shared/src"],
-      "@resell-lausanne/db": ["packages/db/src"]
+      "@resell-lausanne/shared": ["packages/shared/dist"],
+      "@resell-lausanne/db": ["packages/db/dist"]
     },
     "target": "ES2021",
     "module": "ESNext",
