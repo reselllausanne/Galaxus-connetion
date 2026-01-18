@@ -1,0 +1,3 @@
+providerKey,supplierSku,stockQty,cost,currency,leadTimeDays,source
+ABC-001,,10,42.5,CHF,3,supplierA
+ABC-002,SUPSKU-123,5,39.9,CHF,5,supplierB

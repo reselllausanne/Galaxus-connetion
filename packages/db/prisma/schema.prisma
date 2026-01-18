@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SourceType {
+  API
+  CSV
+  MANUAL
+}
+
+enum Channel {
+  GALAXUS
+  SHOPIFY
+}
+
+model ProductVariant {
+  id                String   @id @default(uuid())
+  providerKey       String   @unique
+  shopifyVariantId  String?
+  title             String
+  brand             String?
+  gtin              String?
+  sku               String?
+  size              String?
+  color             String?
+  imageUrl          String?
+  weightGrams       Int?
+  originCountry     String?
+  attributesJson    Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Source {
+  id         String     @id @default(uuid())
+  name       String     @unique
+  type       SourceType
+  configJson Json?
+  offers     Offer[]
+}
+
+model Offer {
+  id             String   @id @default(uuid())
+  providerKey    String
+  source         Source   @relation(fields: [sourceId], references: [id])
+  sourceId       String
+  stockQty       Int
+  cost           Decimal
+  currency       String
+  leadTimeDays   Int?
+  lastSeenAt     DateTime
+  rawJson        Json?
+
+  @@unique([providerKey, sourceId])
+  @@index([providerKey])
+}
+
+model ChannelOffer {
+  id                  String   @id @default(uuid())
+  providerKey         String
+  channel             Channel
+  publish             Boolean  @default(false)
+  sellPrice           Decimal?
+  sellCurrency        String?
+  stockPolicy         Json?
+  computedStockQty    Int?
+  computedLeadTimeDays Int?
+  computedCost        Decimal?
+  updatedAt           DateTime @updatedAt
+
+  @@unique([providerKey, channel])
+  @@index([providerKey])
+}
+

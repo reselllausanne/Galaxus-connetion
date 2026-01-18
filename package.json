@@ -1,0 +1,25 @@
+{
+  "name": "resell-lausanne-integration-hub",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm run dev --workspace @resell-lausanne/api",
+    "dev:worker": "npm run dev --workspace @resell-lausanne/worker",
+    "start:api": "npm run start --workspace @resell-lausanne/api",
+    "start:worker": "npm run start --workspace @resell-lausanne/worker",
+    "build:shared": "npm run build --workspace @resell-lausanne/shared",
+    "build:db": "npm run build --workspace @resell-lausanne/db",
+    "build:api": "npm run build --workspace @resell-lausanne/api",
+    "build:worker": "npm run build --workspace @resell-lausanne/worker",
+    "build": "npm run build:shared && npm run build:db && npm run build:api && npm run build:worker",
+    "test": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/integration_hub npm run test --workspace @resell-lausanne/api && npm run test --workspace @resell-lausanne/worker",
+    "lint": "eslint apps packages"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
+}
+

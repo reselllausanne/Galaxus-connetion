@@ -1,0 +1,26 @@
+{
+  "name": "@resell-lausanne/shared",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "dev": "tsc --project tsconfig.json --watch"
+  },
+  "dependencies": {
+    "pino": "^8.0.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "pino-pretty": "^10.0.0",
+    "typescript": "^5.2.2"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts",
+      "require": "./dist/index.js"
+    }
+  }
+}
+

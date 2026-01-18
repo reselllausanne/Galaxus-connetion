@@ -1,0 +1,29 @@
+{
+  "name": "@resell-lausanne/api",
+  "version": "0.1.0",
+  "main": "dist/server.js",
+  "types": "dist/server.d.ts",
+  "scripts": {
+    "dev": "ts-node --project tsconfig.json src/server.ts",
+    "build": "tsc --project tsconfig.json",
+    "start": "node dist/server.js",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@resell-lausanne/shared": "*",
+    "@resell-lausanne/db": "*",
+    "bullmq": "^2.4.0",
+    "fastify": "^4.27.0",
+    "@fastify/cors": "^7.0.0",
+    "dotenv": "^16.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.4.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2",
+    "vitest": "^4.0.17",
+    "eslint": "^9.0.0"
+  }
+}
+
