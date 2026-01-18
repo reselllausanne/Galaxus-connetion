@@ -1,5 +1,9 @@
-FROM node:20-alpine AS base
+FROM node:20-bullseye-slim AS base
 WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends openssl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY package.json package-lock.json* ./
 COPY apps/api/package.json ./apps/api/
@@ -16,8 +20,12 @@ RUN npm run generate --workspace @resell-lausanne/db
 RUN npm run build:db
 RUN npm run build:worker
 
-FROM node:20-alpine AS release
+FROM node:20-bullseye-slim AS release
 WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends openssl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=base /app/package.json ./package.json
 COPY --from=base /app/node_modules ./node_modules
