@@ -4,6 +4,7 @@ import path from "path";
 import Decimal from "decimal.js";
 import { config, logger } from "@resell-lausanne/shared";
 import { prisma } from "@resell-lausanne/db";
+import { fetchGoldenSneakersOffers } from "./golden-sneakers";
 
 interface SupplierRow {
   providerKey?: string;
@@ -102,5 +103,45 @@ export async function syncSupplierOffers() {
 
   await Promise.all(tasks);
   logger.info({ count: rows.length }, "Supplier offers synced");
+
+  const goldenOffers = await fetchGoldenSneakersOffers();
+  if (goldenOffers.length) {
+    const source = await prisma.source.upsert({
+      where: { name: "goldensneakers" },
+      create: { name: "goldensneakers", type: "API" },
+      update: {}
+    });
+
+    await Promise.all(
+      goldenOffers.map((offer) =>
+        prisma.offer.upsert({
+          where: {
+            providerKey_sourceId: {
+              providerKey: offer.providerKey,
+              sourceId: source.id
+            }
+          },
+          create: {
+            providerKey: offer.providerKey,
+            sourceId: source.id,
+            stockQty: offer.stockQty,
+            cost: offer.cost.toString(),
+            currency: offer.currency,
+            leadTimeDays: offer.leadTimeDays,
+            lastSeenAt: new Date(),
+            rawJson: offer.raw
+          },
+          update: {
+            stockQty: offer.stockQty,
+            cost: offer.cost.toString(),
+            currency: offer.currency,
+            leadTimeDays: offer.leadTimeDays,
+            lastSeenAt: new Date(),
+            rawJson: offer.raw
+          }
+        })
+      )
+    );
+  }
 }
 

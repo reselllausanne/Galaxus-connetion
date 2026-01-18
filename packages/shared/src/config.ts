@@ -30,7 +30,17 @@ const envSchema = z.object({
 
   EXPORTS_PATH: z.string().default("/exports"),
   SUPPLIER_CSV_PATH: z.string().default("./data/supplier_offers.csv"),
-  SUPPLIER_MAPPING_PATH: z.string().default("./data/supplier_mapping.csv")
+  SUPPLIER_MAPPING_PATH: z.string().default("./data/supplier_mapping.csv"),
+
+  GOLDENSNEAKERS_BASE_URL: z
+    .string()
+    .default("https://www.goldensneakers.net/api/assortment/"),
+  GOLDENSNEAKERS_TOKEN: z.string().optional(),
+  GOLDENSNEAKERS_SEARCH_QUERY: z.string().default(""),
+  GOLDENSNEAKERS_MARKUP: z.coerce.number().default(10),
+  GOLDENSNEAKERS_VAT: z.coerce.number().default(8.1),
+  GOLDENSNEAKERS_ROUNDING: z.string().default("whole"),
+  GOLDENSNEAKERS_ONLY_EAN: z.coerce.boolean().default(true)
 });
 
 export const config = envSchema.parse(process.env);
