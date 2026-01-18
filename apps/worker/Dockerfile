@@ -12,6 +12,7 @@ RUN npm install
 COPY . .
 
 RUN npm run build:shared
+RUN npm run generate --workspace @resell-lausanne/db
 RUN npm run build:db
 RUN npm run build:worker
 
