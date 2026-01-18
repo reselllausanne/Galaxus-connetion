@@ -7,7 +7,7 @@
     "dev": "ts-node --project tsconfig.json src/worker.ts",
     "build": "tsc --project tsconfig.json",
     "start": "node dist/worker.js",
-    "test": "vitest run"
+    "test": "vitest run --exclude dist/**"
   },
   "dependencies": {
     "@resell-lausanne/db": "*",
